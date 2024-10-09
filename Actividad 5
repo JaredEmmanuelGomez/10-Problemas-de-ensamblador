@@ -1,1 +1,40 @@
+Actividad 5. Capitulo 1. PROBLEMAS INTRODUCTORIOS
+Ejercicio 7: Determinar si un número dado es divisible entre 14.
 
+PSEUDOCÓDIGO
+INICIO
+    // Solicitar al usuario que ingrese un número
+    ESCRIBIR "Ingrese un número: "
+    LEER numero
+
+    // Verificar si el número es divisible entre 14
+    SI numero MOD 14 == 0 ENTONCES
+        ESCRIBIR "El número es divisible entre 14."
+    SINO
+        ESCRIBIR "El número no es divisible entre 14."
+    FIN SI
+FIN
+
+C# Y ARM64
+/*
+using System;
+class Program
+{
+    static void Main()
+    {
+        // Solicitar al usuario que ingrese un número
+        Console.Write("Ingrese un número: ");
+        int numero = Convert.ToInt32(Console.ReadLine());
+
+        // Verificar si el número es divisible entre 14
+        if (numero % 14 == 0)
+        {
+            Console.WriteLine("El número es divisible entre 14.");
+        }
+        else
+        {
+            Console.WriteLine("El número no es divisible entre 14.");
+        }
+    }
+}
+*/
