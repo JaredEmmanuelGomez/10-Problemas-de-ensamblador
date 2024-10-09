@@ -1,1 +1,190 @@
+Actividad 3. Capitulo 1. PROBLEMAS INTRODUCTORIOS
+Ejercicio 32: Determinar si un entero dado es divisible entre 2 y 5.
 
+PSEUDOCÓDIGO
+INICIO
+    DECLARAR numero COMO ENTERO
+    DECLARAR divisiblePor2 COMO BOOLEANO
+    DECLARAR divisiblePor5 COMO BOOLEANO
+
+    IMPRIMIR "Ingrese un número entero:"
+    LEER numero
+
+    // Comprobar si es divisible por 2
+    SI (numero MOD 2 = 0) ENTONCES
+        divisiblePor2 = VERDADERO
+    SINO
+        divisiblePor2 = FALSO
+    FIN SI
+
+    // Comprobar si es divisible por 5
+    SI (numero MOD 5 = 0) ENTONCES
+        divisiblePor5 = VERDADERO
+    SINO
+        divisiblePor5 = FALSO
+    FIN SI
+
+    // Mostrar resultados
+    SI (divisiblePor2 Y divisiblePor5) ENTONCES
+        IMPRIMIR "El número es divisible entre 2 y 5."
+    SINO SI (divisiblePor2) ENTONCES
+        IMPRIMIR "El número es divisible por 2 pero no por 5."
+    SINO SI (divisiblePor5) ENTONCES
+        IMPRIMIR "El número es divisible por 5 pero no por 2."
+    SINO
+        IMPRIMIR "El número no es divisible ni por 2 ni por 5."
+    FIN SI
+FIN
+
+C# Y ARM64
+/*using System;
+
+class Divisibilidad
+{
+    static void Main()
+    {
+        // Declarar variables
+        int numero;
+        bool divisiblePor2, divisiblePor5;
+
+        // Solicitar al usuario que ingrese un número
+        Console.WriteLine("Ingrese un número entero:");
+        numero = Convert.ToInt32(Console.ReadLine());
+
+        // Comprobar si es divisible por 2
+        divisiblePor2 = (numero % 2 == 0);
+
+        // Comprobar si es divisible por 5
+        divisiblePor5 = (numero % 5 == 0);
+
+        // Mostrar resultados
+        if (divisiblePor2 && divisiblePor5)
+        {
+            Console.WriteLine("El número es divisible entre 2 y 5.");
+        }
+        else if (divisiblePor2)
+        {
+            Console.WriteLine("El número es divisible por 2 pero no por 5.");
+        }
+        else if (divisiblePor5)
+        {
+            Console.WriteLine("El número es divisible por 5 pero no por 2.");
+        }
+        else
+        {
+            Console.WriteLine("El número no es divisible ni por 2 ni por 5.");
+        }
+    }
+}
+*/
+
+//PROGRAMA EN ARM64
+//Determinar si un entero dado es divisible entre 2 y 5.
+
+.global _start
+.align 2
+
+// Declaraciones de funciones
+.type print_string, %function
+.type read_int, %function
+
+_start:
+    // Imprimir mensaje de entrada
+    ldr x1, =msg_input
+    bl print_string
+
+    // Leer un número entero del usuario
+    bl read_int         // Llamar a la función para leer un entero
+    mov x19, x0         // Guardar el número ingresado en x19
+
+    // Comprobar divisibilidad por 2
+    and x20, x19, #1    // x20 = x19 & 1 (último bit)
+    cmp x20, #0         // Comparar si el último bit es 0
+    cset x23, eq        // Si es 0, x23 = 1 (divisible por 2)
+
+    // Comprobar divisibilidad por 5
+    mov x20, #5
+    udiv x21, x19, x20  // x21 = x19 / 5
+    mul x22, x21, x20   // x22 = x21 * 5
+    cmp x22, x19        // Comparar si x22 es igual a x19
+    cset x24, eq        // Si son iguales, x24 = 1 (divisible por 5)
+
+    // Mostrar resultados
+    cbz x23, not_div_2  // Si no es divisible por 2
+    cbz x24, div_2      // Si es divisible por 2, pero no por 5
+    // Divisible por 2 y 5
+    ldr x1, =msg_div_2_5
+    b print_result
+div_2:
+    // Divisible solo por 2
+    ldr x1, =msg_div_2
+    b print_result
+not_div_2:
+    cbz x24, not_div_5  // Si no es divisible ni por 2 ni por 5
+    // Divisible solo por 5
+    ldr x1, =msg_div_5
+    b print_result
+not_div_5:
+    // No divisible ni por 2 ni por 5
+    ldr x1, =msg_not_div
+
+print_result:
+    bl print_string      // Llamar a la función para imprimir el resultado
+
+    // Salir del programa
+    mov x0, #0
+    mov x8, #93         // Número de sistema para exit
+    svc #0
+
+// Función para imprimir una cadena
+print_string:
+    mov x0, #1          // File descriptor STDOUT
+    mov x2, #0          // Longitud de la cadena
+find_length:
+    ldrb w3, [x1, x2]   // Cargar el siguiente byte
+    cbz w3, print       // Si es NULL, ir a imprimir
+    add x2, x2, #1      // Incrementar longitud
+    b find_length
+print:
+    mov x8, #64         // syscall: write
+    svc #0
+    ret
+
+// Función para leer un entero
+read_int:
+    // Reservar espacio en la pila para el búfer
+    sub sp, sp, #16
+    mov x1, sp          // Puntero al búfer
+    mov x2, #10         // Tamaño máximo de la entrada (9 dígitos + '\n')
+    mov x0, #0          // File descriptor STDIN
+    mov x8, #63         // syscall: read
+    svc #0
+
+    // Convertir la cadena a un entero
+    mov x0, #0          // Inicializar el resultado
+    mov x2, #0          // Índice del búfer
+    mov x4, #10         // Constante 10 para multiplicar
+convert_loop:
+    ldrb w3, [x1, x2]   // Cargar el siguiente byte
+    cmp w3, #'\n'       // Comprobar si es el final de la línea
+    beq convert_done    // Si es '\n', terminar la conversión
+    sub w3, w3, #'0'    // Convertir ASCII a valor numérico
+    mul x0, x0, x4      // Multiplicar el resultado actual por 10
+    add x0, x0, x3      // Añadir el nuevo dígito
+    add x2, x2, #1      // Incrementar el índice
+    b convert_loop
+convert_done:
+    add sp, sp, #16     // Restaurar el puntero de la pila
+    ret
+
+// Datos
+.data
+msg_input: .asciz "Ingrese un número: "
+msg_div_2_5: .asciz "El número es divisible entre 2 y 5.\n"
+msg_div_2: .asciz "El número es divisible por 2 pero no por 5.\n"
+msg_div_5: .asciz "El número es divisible por 5 pero no por 2.\n"
+msg_not_div: .asciz "El número no es divisible ni por 2 ni por 5.\n"
+
+
+ASCIINEMA
+https://asciinema.org/a/679922
