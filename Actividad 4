@@ -1,1 +1,113 @@
+Actividad 4. Capitulo 1. PROBLEMAS INTRODUCTORIOS
+Ejercicio 9: Introducir un número y determinar si es “par” o “impar”.
 
+PSEUDOCÓDIGO
+INICIO
+    FUNCION main():
+        DECLARAR numero COMO ENTERO
+
+        IMPRIMIR "Introduce un número:"
+        LEER numero
+
+        SI (numero MOD 2) = 0 ENTONCES
+            IMPRIMIR "El número es par."
+        SINO
+            IMPRIMIR "El número es impar."
+        FIN SI
+    FIN FUNCION
+
+    main()
+FIN
+
+C# Y ARM64
+/*using System;
+
+class ParImpar
+{
+    static void Main()
+    {
+        // Declarar una variable para almacenar el número ingresado
+        int numero;
+
+        // Solicitar al usuario que introduzca un número
+        Console.WriteLine("Introduce un número:");
+        
+        // Leer el número ingresado por el usuario y convertirlo a entero
+        numero = Convert.ToInt32(Console.ReadLine());
+
+        // Verificar si el número es par o impar
+        if (numero % 2 == 0) // Si el residuo de la división entre 2 es 0
+        {
+            // Imprimir que el número es par
+            Console.WriteLine("El número es par.");
+        }
+        else
+        {
+            // Imprimir que el número es impar
+            Console.WriteLine("El número es impar.");
+        }
+    }
+}
+*/
+
+//EJERCICIO EN ARM64
+//Introducir un número y determinar si es “par” o “impar”.
+
+.global _start
+.align 2
+
+_start:
+    // Imprimir mensaje de entrada
+    mov x0, #1              // STDOUT
+    ldr x1, =msg_input      // Puntero al mensaje
+    mov x2, #19             // Longitud del mensaje
+    mov x8, #64             // syscall: write
+    svc #0
+
+    // Leer la entrada del usuario
+    mov x0, #0              // STDIN
+    ldr x1, =input_buffer   // Buffer para almacenar la entrada
+    mov x2, #20             // Tamaño máximo de la entrada
+    mov x8, #63             // syscall: read
+    svc #0
+
+    // Convertir el primer carácter a un número
+    ldrb w3, [x1]           // Cargar el primer byte
+    sub w3, w3, #'0'        // Convertir ASCII a número
+
+    // Comprobar si es par o impar
+    and x4, x3, #1          // x4 = x3 & 1 (último bit)
+    cbnz x4, num_impar      // Si el último bit no es 0, el número es impar
+
+    // Es par
+    mov x0, #1              // STDOUT
+    ldr x1, =msg_par        // Mensaje "Es par"
+    mov x2, #16             // Longitud del mensaje
+    mov x8, #64             // syscall: write
+    svc #0
+    b exit
+
+num_impar:
+    // Es impar
+    mov x0, #1              // STDOUT
+    ldr x1, =msg_impar      // Mensaje "Es impar"
+    mov x2, #17             // Longitud del mensaje
+    mov x8, #64             // syscall: write
+    svc #0
+
+exit:
+    // Salir del programa
+    mov x0, #0
+    mov x8, #93             // syscall: exit
+    svc #0
+
+.data
+input_buffer: .space 20
+msg_input: .asciz "Ingrese un número: "
+msg_par: .asciz "El número es par\n"
+msg_impar: .asciz "El número es impar\n"
+
+
+
+ASCIINEMA
+https://asciinema.org/a/679939
