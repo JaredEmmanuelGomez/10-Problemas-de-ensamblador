@@ -1,1 +1,107 @@
+Actividad 8. Capitulo 1. PROBLEMAS INTRODUCTORIOS
+Ejercicio 16: Imprimir la tabla de multiplicar hasta 12 x 12.
 
+PSEUDOCÓDIGO
+INICIO
+    PARA i DESDE 1 HASTA 12 HACER
+        PARA j DESDE 1 HASTA 12 HACER
+            resultado <- i * j
+            IMPRIMIR i, " x ", j, " = ", resultado
+        FIN PARA
+    FIN PARA
+FIN
+
+
+C# Y ARM64
+/*
+using System;
+class Program
+{
+    static void Main()
+    {
+        for (int i = 1; i <= 12; i++)
+        {
+            for (int j = 1; j <= 12; j++)
+            {
+                int resultado = i * j;
+                Console.WriteLine($"{i} x {j} = {resultado}");
+            }
+            Console.WriteLine(); // Para dejar una línea en blanco entre tablas
+        }
+    }
+}
+
+*/
+
+/ARM64
+.data
+format: .asciz "%d x %d = %d\n"
+newline: .asciz "\n"
+
+.text
+.global main
+.extern printf
+
+main:
+    // Guardar el enlace de retorno y los registros que usaremos
+    stp x29, x30, [sp, #-16]!
+    mov x29, sp
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
+
+    // Inicializar i en x19
+    mov x19, #1
+
+outer_loop:
+    // Comprobar si i <= 12
+    cmp x19, #12
+    bgt end_outer_loop
+
+    // Inicializar j en x20
+    mov x20, #1
+
+inner_loop:
+    // Comprobar si j <= 12
+    cmp x20, #12
+    bgt end_inner_loop
+
+    // Calcular i * j
+    mul x21, x19, x20
+
+    // Imprimir el resultado
+    adrp x0, format
+    add x0, x0, :lo12:format
+    mov x1, x19
+    mov x2, x20
+    mov x3, x21
+    bl printf
+
+    // Incrementar j
+    add x20, x20, #1
+
+    // Volver al inicio del bucle interno
+    b inner_loop
+
+end_inner_loop:
+    // Imprimir una línea en blanco
+    adrp x0, newline
+    add x0, x0, :lo12:newline
+    bl printf
+
+    // Incrementar i
+    add x19, x19, #1
+
+    // Volver al inicio del bucle externo
+    b outer_loop
+
+end_outer_loop:
+    // Restaurar registros y salir
+    ldp x21, x22, [sp], #16
+    ldp x19, x20, [sp], #16
+    ldp x29, x30, [sp], #16
+    mov w0, #0
+    ret
+
+
+ASCIINEMA
+https://asciinema.org/a/680148
