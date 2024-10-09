@@ -1,2 +1,87 @@
 Actividad 7. Capitulo 1. PROBLEMAS INTRODUCTORIOS
 Ejercicio 19: Encontrar la suma de los enteros del 1 al 1,000.
+
+PSEUDOCÓDIGO
+INICIO
+    DECLARAR suma COMO ENTERO
+    suma <- 0
+
+    PARA i DESDE 1 HASTA 1000 HACER
+        suma <- suma + i
+    FIN PARA
+
+    IMPRIMIR suma
+FIN
+
+
+
+
+C# Y ARM64
+/*
+using System;
+class Program
+{
+    static void Main()
+    {
+        int suma = 0;
+
+        for (int i = 1; i <= 1000; i++)
+        {
+            suma += i;
+        }
+
+        Console.WriteLine(suma);
+    }
+}
+*/
+
+//ARM64
+//Encontrar la suma de los enteros del 1 al 1,000.
+
+.data
+format: .asciz "La suma de los numeros del 1 al 1000 es: %d\n"    // Formato para imprimir el resultado
+
+.text
+.global main
+.extern printf
+
+main:
+    // Guardar el enlace de retorno
+    stp x29, x30, [sp, #-16]!
+    mov x29, sp
+
+    // Inicializar la suma en x19
+    mov x19, #0
+    // Inicializar el contador (i) en x20
+    mov x20, #1
+
+loop:
+    // Comprobar si i <= 1000
+    cmp x20, #1000
+    bgt end_loop
+
+    // Sumar i a la suma
+    add x19, x19, x20
+
+    // Incrementar i
+    add x20, x20, #1
+
+    // Volver al inicio del bucle
+    b loop
+
+end_loop:
+    // Imprimir el resultado
+    adrp x0, format
+    add x0, x0, :lo12:format
+    mov x1, x19
+    bl printf
+
+    // Restaurar el enlace de retorno y salir
+    ldp x29, x30, [sp], #16
+    mov w0, #0
+    ret
+
+
+
+ASCIINEMA
+https://asciinema.org/a/680147
