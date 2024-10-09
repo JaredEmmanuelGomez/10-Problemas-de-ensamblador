@@ -1,1 +1,138 @@
+Actividad 2. Capitulo 1. PROBLEMAS INTRODUCTORIOS
+Ejercicio 17: Calcular e imprimir la suma de los enteros del 1 al 20.
 
+PSEUDOCÓDIGO
+INICIO
+función calcularSuma():
+    suma = 0
+    para i desde 1 hasta 20:
+        suma = suma + i
+    fin para
+    retornar suma
+
+// Programa principal
+resultado = calcularSuma()
+imprimir "La suma de los enteros del 1 al 20 es:", resultado
+FIN
+
+ARM64 Y C#
+/*using System;
+
+class SumaEnteros
+{
+    static int CalcularSuma()
+    {
+        int suma = 0;
+        for (int i = 1; i <= 20; i++)
+        {
+            suma += i;
+        }
+        return suma;
+    }
+
+    static void Main()
+    {
+        int resultado = CalcularSuma();
+        Console.WriteLine($"La suma de los enteros del 1 al 20 es: {resultado}");
+    }
+}
+*/
+
+//PROGRAMA EN ARM64 
+//Calcular e imprimir la suma de los enteros del 1 al 20.
+
+.global _start
+.align 2
+
+// Declaraciones de funciones
+.type int_to_string, %function
+.type print_string, %function
+
+_start:
+    mov x19, #0         // x19 = suma = 0
+    mov x20, #1         // x20 = i = 1
+
+loop:
+    add x19, x19, x20   // suma += i
+    add x20, x20, #1    // i++
+    cmp x20, #21        // comparar i con 21
+    blt loop            // si i < 21, continuar el bucle
+
+    // Convertir el resultado a string
+    mov x0, x19         // El número que se va a convertir
+    ldr x1, =buffer     // Cargar dirección del buffer
+    bl int_to_string    // Llamar a la función para convertir int a string
+
+    // Imprimir el mensaje
+    ldr x1, =message    // Cargar la dirección del mensaje
+    bl print_string      // Llamar a la función para imprimir el mensaje
+
+    // Imprimir el resultado
+    ldr x1, =buffer     // La cadena resultante de la suma
+    bl print_string      // Llamar a la función para imprimir el resultado
+
+    // Salir del programa
+    mov x0, #0
+    mov x8, #93         // Número de sistema para exit
+    svc #0
+
+// Función para convertir int a string
+int_to_string:
+    ldr x2, =buffer     // Cargar dirección del buffer
+    mov x3, #0          // Contador de dígitos
+    mov x4, #10         // Divisor para convertir a decimal
+
+convert_loop:
+    // Obtener el siguiente dígito
+    udiv x5, x0, x4     // x5 = x0 / 10
+    msub x6, x5, x4, x0 // x6 = x0 - (x5 * 10)
+    add x6, x6, #48     // Convertir dígito a ASCII (0-9)
+    strb w6, [x2, x3]   // Almacenar dígito en el buffer
+    add x3, x3, #1      // Incrementar contador de dígitos
+    mov x0, x5          // Preparar el próximo número
+    cmp x0, #0          // Comparar con 0
+    b.ne convert_loop    // Repetir si no es cero
+
+    // Null-terminate la cadena
+    strb wzr, [x2, x3]  // Añadir NULL terminator
+
+    // Invertir la cadena en el buffer
+    sub x2, x2, x3      // Obtener la dirección del inicio
+    add x3, x3, #1      // Ajustar el tamaño
+reverse_loop:
+    sub x3, x3, #1
+    cmp x3, #0
+    blt end_reverse
+    ldrb w6, [x2, x3]   // Cargar byte de la cadena
+    strb w6, [x2, x3]   // Guardar byte en la posición correspondiente
+    b reverse_loop
+
+end_reverse:
+    ret
+
+// Función para imprimir una cadena
+print_string:
+    mov x0, #1          // File descriptor STDOUT
+    mov x2, #0          // Longitud de la cadena
+
+find_length:
+    ldrb w3, [x1, x2]   // Cargar el siguiente byte
+    cmp w3, #0          // Comparar con NULL terminador
+    beq print           // Si es NULL, ir a imprimir
+    add x2, x2, #1      // Incrementar longitud
+    b find_length
+
+print:
+    mov x8, #64         // syscall: write
+    svc #0
+    ret
+
+.data
+buffer:
+    .space 20           // Espacio para almacenar la representación en string del número
+message:
+    .asciz "La suma de los enteros del 1 al 20 es: "
+
+
+ASCIINEMA
+https://asciinema.org/a/679917
