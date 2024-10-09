@@ -1,1 +1,128 @@
+Actividad 1. CAPÍTULO 5: PROBABILIDAD Y ESTADÍSTICA
 
+Ejercicio 1: Calcular la probabilidad de obtener cara al lanzar una moneda al aire.
+
+PSEUDOCÓDIGO
+INICIO
+
+FUNCION LanzarMoneda()
+    SI un número aleatorio < 0.5 ENTONCES
+        RETORNAR "Caras"
+    SINO
+        RETORNAR "Cruces"
+    FIN SI
+FIN FUNCION
+
+FUNCION CalcularProbabilidad(totalLanzamientos)
+    contadorCaras = 0
+
+    PARA i desde 1 HASTA totalLanzamientos HACER
+        SI LanzarMoneda() = "Caras" ENTONCES
+            contadorCaras = contadorCaras + 1
+        FIN SI
+    FIN PARA
+
+    RETORNAR contadorCaras / totalLanzamientos
+FIN FUNCION
+
+// Programa principal
+totalLanzamientos = 1000000
+probabilidad = CalcularProbabilidad(totalLanzamientos)
+IMPRIMIR "La probabilidad de caras es: " + probabilidad
+
+FIN
+
+
+ARM64 Y C#
+
+/*
+using System;
+
+class ProbabilidadDeCara
+{
+    private static Random random = new Random();
+
+    static bool LanzarMoneda()
+    {
+        return random.NextDouble() < 0.5;
+    }
+
+    static double CalcularProbabilidadDeCaras(int totalLanzamientos)
+    {
+        int contadorCaras = 0;
+
+        for (int i = 0; i < totalLanzamientos; i++)
+        {
+            if (LanzarMoneda())
+            {
+                contadorCaras++;
+            }
+        }
+
+        return (double)contadorCaras / totalLanzamientos;
+    }
+
+    static void Main()
+    {
+        int totalLanzamientos = 1000000;
+        double probabilidad = CalcularProbabilidadDeCaras(totalLanzamientos);
+        Console.WriteLine($"La probabilidad de obtener caras después de {totalLanzamientos} lanzamientos es: {probabilidad:F4}");
+    }
+}
+*/
+
+    // Calcular la probabilidad de obtener cara al lanzar una moneda al aire
+
+    .global _start
+.align 2
+
+_start:
+    // Obtener la hora del sistema para la semilla aleatoria
+    mov x0, #0      // x0 = 0 (CLOCK_REALTIME)
+    sub sp, sp, #16 // Reservar espacio en la pila
+    mov x1, sp      // x1 = sp (puntero a la estructura timespec)
+    mov x8, #113    // x8 = 113 (número de syscall para clock_gettime)
+    svc #0          // Realizar la syscall
+
+    // Usar los 32 bits inferiores de nanosegundos como nuestro número aleatorio
+    ldr w0, [sp, #8]
+
+    // Comprobar si el número es impar o par
+    and w0, w0, #1
+    cmp w0, #0
+    beq caras
+    b cruces
+
+caras:
+    // Imprimir "Caras"
+    adr x1, caras_msg
+    mov x2, caras_len
+    b imprimir
+
+cruces:
+    // Imprimir "Cruces"
+    adr x1, cruces_msg
+    mov x2, cruces_len
+
+imprimir:
+    mov x0, #1      // x0 = 1 (stdout)
+    mov x8, #64     // x8 = 64 (número de syscall para write)
+    svc #0          // Realizar la syscall
+
+    // Salir
+    mov x0, #0      // x0 = 0 (código de salida)
+    mov x8, #93     // x8 = 93 (número de syscall para exit)
+    svc #0          // Realizar la syscall
+
+.data
+caras_msg:
+    .ascii "Caras\n"
+caras_len = . - caras_msg
+
+cruces_msg:
+    .ascii "Cruces\n"
+cruces_len = . - cruces_msg
+
+
+ASCIINEMA
+https://asciinema.org/a/679905
