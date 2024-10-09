@@ -38,3 +38,68 @@ class Program
     }
 }
 */
+
+//ARM64
+//Determinar si un número dado es divisible entre 14.
+
+.data
+prompt:     .asciz "Ingrese un numero: "
+divisible:  .asciz "El numero es divisible entre 14.\n"
+no_divisible: .asciz "El numero no es divisible entre 14.\n"
+format:     .asciz "%d"
+
+.text
+.global main
+.extern printf
+.extern scanf
+
+main:
+    // Guardar el enlace de retorno y ajustar el stack pointer
+    stp x29, x30, [sp, #-16]!
+    mov x29, sp
+
+    // Imprimir el prompt
+    adrp x0, prompt
+    add x0, x0, :lo12:prompt
+    bl printf
+
+    // Leer el número ingresado
+    sub sp, sp, #16
+    mov x2, sp
+    adrp x0, format
+    add x0, x0, :lo12:format
+    mov x1, x2
+    bl scanf
+
+    // Cargar el número ingresado
+    ldr w0, [sp]
+
+    // Dividir por 14
+    mov w1, #14
+    udiv w2, w0, w1
+    msub w3, w2, w1, w0
+
+    // Comparar el residuo con 0
+    cmp w3, #0
+    bne not_divisible
+
+    // Es divisible
+    adrp x0, divisible
+    add x0, x0, :lo12:divisible
+    bl printf
+    b end
+
+not_divisible:
+    // No es divisible
+    adrp x0, no_divisible
+    add x0, x0, :lo12:no_divisible
+    bl printf
+
+end:
+    // Restaurar el enlace de retorno y salir
+    ldp x29, x30, [sp], #16
+    mov w0, #0
+    ret
+
+ASCIINEMA
+https://asciinema.org/a/680138
